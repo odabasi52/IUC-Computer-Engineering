@@ -1,6 +1,5 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include <cmath>
 #include <iostream>
 
 const char* vertexShaderSource = "#version 330 core\n"
@@ -29,20 +28,16 @@ int main()
     // (x, y, z) coordinates of the triangle
     // every line is a point (vertex) of the triangle
     // if it's 2D, then z can be removed (x,y)
-    GLfloat vertices[] = 
-    {
-        -0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
-        0.5f, -0.5f * float(sqrt(3)) / 3, 0.0f,
-        0.0f, 0.5f * float(sqrt(3)) * 2 / 3, 0.0f,
-        -0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f,
-        0.5f / 2, 0.5f * float(sqrt(3)) / 6, 0.0f,
-        0.0f, -0.5f * float(sqrt(3)) / 3, 0.0f
+    GLfloat vertices[] = {
+        -0.5f, -0.5f,
+        -0.5f, 0.5f,
+        0.5f, 0.5f,
+        0.5f, -0.5f,
     };
 
     GLuint indices[] = {
-        0, 3, 5,
-        3, 2, 4,
-        5, 4, 1
+        0, 1, 2,
+        2, 3, 0
     };
 
     // create vertex shader
@@ -82,7 +77,7 @@ int main()
 
 
     // 2 means 2D, 3 means 3D
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat), (void*)0);
+    glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), (void*)0);
     glEnableVertexAttribArray(0);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -90,7 +85,6 @@ int main()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glPointSize(10.0f);
     while(!glfwWindowShouldClose(window))
     {
         glClear(GL_COLOR_BUFFER_BIT);
@@ -99,8 +93,7 @@ int main()
         glBindVertexArray(VAO);
 
         // how many points to draw
-        glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
-        
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
