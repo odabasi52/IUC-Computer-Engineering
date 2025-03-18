@@ -11,6 +11,7 @@ glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);  // Yukarı yön vektörü
 
 // Kamera hızı
 float cameraSpeed = 0.05f;
+bool perspective = true;
 
 void processInput(GLFWwindow* window) {
     // İleri - Geri hareket (Z ve X)
@@ -30,6 +31,11 @@ void processInput(GLFWwindow* window) {
         cameraPos += cameraSpeed * cameraUp; // Yukarı çık
     if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
         cameraPos -= cameraSpeed * cameraUp; // Aşağı in
+
+    if (glfwGetKey(window, GLFW_KEY_O) == GLFW_PRESS)
+        perspective = false;
+    if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
+        perspective = true;
 }
 
 // shader güncellendi (kamera için)
@@ -51,7 +57,7 @@ const char* fragmentShaderSource = R"(
 out vec4 FragColor;
 void main()
 {
-    FragColor = vec4(1.0, 0.5, 0.2, 1.0);
+    FragColor = vec4(1.0, 0.0, 1.0, 1.0);
 }
 )";
 
@@ -85,20 +91,38 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
+    
     float vertices[] = {
-        -0.5f, -0.5f, 0.0f,
-         0.5f, -0.5f, 0.0f,
-         0.0f,  0.5f, 0.0f
+        -0.5f, -0.5f, -0.5f,
+         0.5f, -0.5f, -0.5f,
+         0.5f,  0.5f, -0.5f,
+        -0.5f,  0.5f, -0.5f,
+        -0.5f, -0.5f,  0.5f,
+         0.5f, -0.5f,  0.5f,
+         0.5f,  0.5f,  0.5f,
+        -0.5f,  0.5f,  0.5f
     };
     
-    unsigned int VAO, VBO;
+    unsigned int indices[] = {
+        0, 1, 2, 2, 3, 0,
+        1, 5, 6, 6, 2, 1,
+        5, 4, 7, 7, 6, 5,
+        4, 0, 3, 3, 7, 4,
+        3, 2, 6, 6, 7, 3,
+        4, 5, 1, 1, 0, 4
+    };
+
+    unsigned int VAO, VBO, EBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-
+    glGenBuffers(1, &EBO);
+    
     glBindVertexArray(VAO);
-
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+    
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
     glEnableVertexAttribArray(0);
@@ -106,6 +130,7 @@ int main()
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
     while (!glfwWindowShouldClose(window))
     {
         processInput(window); // Kullanıcı girişlerini işle
@@ -119,7 +144,7 @@ int main()
         // Specifies the translation vector. In this case, it translates by (0.0, 1.0, 0.0),
         // which means move 1 unit in the positive y-direction.
         myTransform = glm::translate(myTransform, glm::vec3(0.0f, 0.0f, 0.0f));
-        myTransform = glm::rotate(myTransform, (float)glfwGetTime(), glm::vec3(0.0f, 0.0f, 1.0f));
+        myTransform = glm::rotate(myTransform, (float)glfwGetTime(), glm::vec3(1.0f, 1.0f, 1.0f));
         myTransform = glm::scale(myTransform, glm::vec3(1.0f, 1.0f, 1.0f));
         unsigned int transformLoc = glGetUniformLocation(shaderProgram, "transform");        
         glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(myTransform));
@@ -131,7 +156,10 @@ int main()
         glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 
         // Perspektif Projeksiyon Matrisi
-        glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        if (perspective)
+            projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+        else
+            projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);
         unsigned int projectionLoc = glGetUniformLocation(shaderProgram, "projection");
         glUniformMatrix4fv(projectionLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
@@ -139,7 +167,7 @@ int main()
         glUseProgram(shaderProgram);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
