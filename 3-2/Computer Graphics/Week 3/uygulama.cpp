@@ -13,6 +13,11 @@ glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);  // Yukarı yön vektörü
 float cameraSpeed = 0.05f;
 bool perspective = true;
 
+// rotation
+float yaw = -90.0f; // Initially facing -Z direction
+float sensitivity = 1.0f; // Control rotation speed
+float pitch = 0.0f;  // Starts level (not looking up or down)
+
 void processInput(GLFWwindow* window) {
     // İleri - Geri hareket (Z ve X)
     if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS)
@@ -36,6 +41,31 @@ void processInput(GLFWwindow* window) {
         perspective = false;
     if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS)
         perspective = true;
+
+    // Rotate camera right (L key)
+    if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) 
+        yaw += sensitivity; // Increase yaw angle
+    // Rotate camera left (J key)
+    if (glfwGetKey(window, GLFW_KEY_J) == GLFW_PRESS)
+        yaw -= sensitivity; // Decrease yaw angle
+    
+    // Rotate camera up (I key)
+    if (glfwGetKey(window, GLFW_KEY_I) == GLFW_PRESS) {
+        pitch += sensitivity;
+        if (pitch > 89.0f) pitch = 89.0f; // Prevent flipping
+    }
+    // Rotate camera down (K key)
+    if (glfwGetKey(window, GLFW_KEY_K) == GLFW_PRESS) {
+        pitch -= sensitivity;
+        if (pitch < -89.0f) pitch = -89.0f; // Prevent flipping
+    }
+
+    // Update cameraFront based on yaw and pitch
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch)); // Vertical movement
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    cameraFront = glm::normalize(front);
 }
 
 // shader güncellendi (kamera için)
@@ -91,7 +121,6 @@ int main()
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
-    
     float vertices[] = {
         -0.5f, -0.5f, -0.5f,
          0.5f, -0.5f, -0.5f,
