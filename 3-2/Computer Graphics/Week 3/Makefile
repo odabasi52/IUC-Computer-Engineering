@@ -8,7 +8,7 @@ CXXFLAGS = -I glad/include
 LDFLAGS = -lglfw -ldl
 
 # Source files
-SRC = uygulama.cpp glad/src/glad.c
+SRC = main.cpp glad/src/glad.c
 
 # Output executable
 OUT = main
