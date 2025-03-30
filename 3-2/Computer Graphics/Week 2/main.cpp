@@ -37,7 +37,7 @@ int main()
 
     GLuint indices[] = {
         0, 1, 2,
-        2, 3, 0
+        1, 2, 3
     };
 
     // create vertex shader

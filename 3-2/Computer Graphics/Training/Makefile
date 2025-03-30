@@ -2,19 +2,21 @@
 CXX = g++
 
 # Compiler flags
-CXXFLAGS = -I glad/include
+CXXFLAGS = -I glad/include 
 
 # Libraries to link
 LDFLAGS = -lglfw -ldl
 
 # Source files
-SRC = uygulama.cpp glad/src/glad.c
+SRC = *.cpp glad/src/glad.c
 
 # Output executable
 OUT = main
 
 # Default target
 all: $(OUT)
+
+run: $(OUT); ./main
 
 # Build target
 $(OUT): $(SRC)
