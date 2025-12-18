@@ -9,11 +9,11 @@ i = 1
 def steps(Z, u, v):
         mod = Z % 3
         if mod == 0:
-                return ((Z*Z) % 809, (2*u)%808, (2*v)%808)
+                return ((Z*Z) % p, (2*u)%(p-1), (2*v)%(p-1))
         elif mod == 1:
-                return ((Z*B) % 809, u%808, (v+1)%808)
+                return ((Z*B) % p, u%(p-1), (v+1)%(p-1))
         elif mod == 2:
-                return ((Z*a) % 809, (u+1) % 808, v % 808)
+                return ((Z*a) % p, (u+1) % (p-1), v % (p-1))
 
 Zt = 1
 ut = 0
